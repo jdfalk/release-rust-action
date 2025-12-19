@@ -1,0 +1,76 @@
+# file: .github/workflows/ci.yml
+# version: 1.0.0
+# guid: e1f2a3b4-c5d6-7890-e456-901234567890
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate action.yml
+        run: |
+          if [ ! -f action.yml ]; then
+            echo "Error: action.yml not found"
+            exit 1
+          fi
+          echo "✅ action.yml validation passed"
+
+  test:
+    name: Test Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Create test project
+        run: |
+          cargo new test-project
+          cd test-project
+          cat >> Cargo.toml << 'EOF'
+
+          [profile.release]
+          opt-level = 3
+          lto = true
+          EOF
+
+      - name: Test action execution
+        uses: ./
+        with:
+          version: "1.0.0-test"
+          project-path: "./test-project"
+          binary-name: "test-project"
+          targets: "x86_64-unknown-linux-gnu"
+          upload-artifacts: "false"
+          dry-run: "true"
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: action.yml
