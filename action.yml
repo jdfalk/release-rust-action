@@ -139,7 +139,7 @@ runs:
 
         MANIFEST="${{ inputs.manifest-path }}"
         cargo publish --manifest-path $MANIFEST $DRY_RUN \
-          $FEATURES_ARG
+          $FEATURES_ARG --allow-dirty
       shell: bash
 
     - name: Output summary
