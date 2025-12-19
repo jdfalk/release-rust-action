@@ -63,7 +63,6 @@ runs:
       with:
         toolchain: ${{ inputs.rust-version }}
         components: clippy, rustfmt
-      shell: bash
 
     - name: Extract crate metadata
       id: metadata
