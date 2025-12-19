@@ -67,8 +67,11 @@ runs:
     - name: Extract crate metadata
       id: metadata
       run: |
-        NAME=$(cargo metadata --manifest-path ${{ inputs.manifest-path }} --format-version 1 --no-deps | jq -r '.packages[0].name')
-        VERSION=$(cargo metadata --manifest-path ${{ inputs.manifest-path }} --format-version 1 --no-deps | jq -r '.packages[0].version')
+        MANIFEST="${{ inputs.manifest-path }}"
+        NAME=$(cargo metadata --manifest-path $MANIFEST \
+          --format-version 1 --no-deps | jq -r '.packages[0].name')
+        VERSION=$(cargo metadata --manifest-path $MANIFEST \
+          --format-version 1 --no-deps | jq -r '.packages[0].version')
         echo "name=$NAME" >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
       shell: bash
@@ -88,7 +91,9 @@ runs:
         elif [ -n "${{ inputs.features }}" ]; then
           FEATURES_ARG="--features ${{ inputs.features }}"
         fi
-        cargo clippy --manifest-path ${{ inputs.manifest-path }} $FEATURES_ARG -- -D warnings
+        MANIFEST="${{ inputs.manifest-path }}"
+        cargo clippy --manifest-path $MANIFEST $FEATURES_ARG \
+          -- -D warnings
       shell: bash
 
     - name: Run tests
@@ -111,7 +116,9 @@ runs:
         elif [ -n "${{ inputs.features }}" ]; then
           FEATURES_ARG="--features ${{ inputs.features }}"
         fi
-        cargo build --manifest-path ${{ inputs.manifest-path }} --release $FEATURES_ARG
+        MANIFEST="${{ inputs.manifest-path }}"
+        cargo build --manifest-path $MANIFEST --release \
+          $FEATURES_ARG
       shell: bash
 
     - name: Publish to crates.io
@@ -130,18 +137,23 @@ runs:
           FEATURES_ARG="--features ${{ inputs.features }}"
         fi
 
-        cargo publish --manifest-path ${{ inputs.manifest-path }} $DRY_RUN $FEATURES_ARG
+        MANIFEST="${{ inputs.manifest-path }}"
+        cargo publish --manifest-path $MANIFEST $DRY_RUN \
+          $FEATURES_ARG
       shell: bash
 
     - name: Output summary
       run: |
-        echo "## Rust Crate Release Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Crate:** ${{ steps.metadata.outputs.name }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Version:** ${{ steps.metadata.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Registry:** crates.io" >> $GITHUB_STEP_SUMMARY
-        echo "**Rust:** ${{ inputs.rust-version }}" >> $GITHUB_STEP_SUMMARY
+        {
+          echo "## Rust Crate Release Summary"
+          echo ""
+          echo "**Crate:** ${{ steps.metadata.outputs.name }}"
+          echo "**Version:** ${{ steps.metadata.outputs.version }}"
+          echo "**Registry:** crates.io"
+          echo "**Rust:** ${{ inputs.rust-version }}"
+        } >> $GITHUB_STEP_SUMMARY
         if [ "${{ inputs.dry-run }}" == "true" ]; then
-          echo "**Status:** Dry run (not published)" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Dry run (not published)" \
+            >> $GITHUB_STEP_SUMMARY
         fi
       shell: bash
