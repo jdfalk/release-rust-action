@@ -56,11 +56,12 @@ jobs:
       - name: Test action execution
         uses: ./
         with:
-          version: "1.0.0-test"
-          project-path: "./test-project"
-          binary-name: "test-project"
-          targets: "x86_64-unknown-linux-gnu"
-          upload-artifacts: "false"
+          rust-version: "stable"
+          manifest-path: "./test-project/Cargo.toml"
+          crate-token: "fake-token-for-testing"
+          run-tests: "true"
+          run-clippy: "true"
+          check-format: "false"
           dry-run: "true"
 
   lint:
