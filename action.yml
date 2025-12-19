@@ -66,22 +66,21 @@ runs:
 
     - name: Extract crate metadata
       id: metadata
-      shell: bash
       run: |
         NAME=$(cargo metadata --manifest-path ${{ inputs.manifest-path }} --format-version 1 --no-deps | jq -r '.packages[0].name')
         VERSION=$(cargo metadata --manifest-path ${{ inputs.manifest-path }} --format-version 1 --no-deps | jq -r '.packages[0].version')
         echo "name=$NAME" >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
+      shell: bash
 
     - name: Check formatting
       if: inputs.check-format == 'true'
-      shell: bash
       run: |
         cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
+      shell: bash
 
     - name: Run clippy
       if: inputs.run-clippy == 'true'
-      shell: bash
       run: |
         FEATURES_ARG=""
         if [ "${{ inputs.all-features }}" == "true" ]; then
@@ -90,10 +89,10 @@ runs:
           FEATURES_ARG="--features ${{ inputs.features }}"
         fi
         cargo clippy --manifest-path ${{ inputs.manifest-path }} $FEATURES_ARG -- -D warnings
+      shell: bash
 
     - name: Run tests
       if: inputs.run-tests == 'true'
-      shell: bash
       run: |
         FEATURES_ARG=""
         if [ "${{ inputs.all-features }}" == "true" ]; then
@@ -102,9 +101,9 @@ runs:
           FEATURES_ARG="--features ${{ inputs.features }}"
         fi
         cargo test --manifest-path ${{ inputs.manifest-path }} $FEATURES_ARG
+      shell: bash
 
     - name: Build crate
-      shell: bash
       run: |
         FEATURES_ARG=""
         if [ "${{ inputs.all-features }}" == "true" ]; then
@@ -113,9 +112,9 @@ runs:
           FEATURES_ARG="--features ${{ inputs.features }}"
         fi
         cargo build --manifest-path ${{ inputs.manifest-path }} --release $FEATURES_ARG
+      shell: bash
 
     - name: Publish to crates.io
-      shell: bash
       env:
         CARGO_REGISTRY_TOKEN: ${{ inputs.crate-token }}
       run: |
@@ -132,9 +131,9 @@ runs:
         fi
 
         cargo publish --manifest-path ${{ inputs.manifest-path }} $DRY_RUN $FEATURES_ARG
+      shell: bash
 
     - name: Output summary
-      shell: bash
       run: |
         echo "## Rust Crate Release Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
@@ -145,3 +144,4 @@ runs:
         if [ "${{ inputs.dry-run }}" == "true" ]; then
           echo "**Status:** Dry run (not published)" >> $GITHUB_STEP_SUMMARY
         fi
+      shell: bash
