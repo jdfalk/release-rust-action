@@ -1,0 +1,148 @@
+# file: action.yml
+# version: 1.0.0
+# guid: 2f7e4a9d-3c8b-4e1a-9f6d-7c3e2a5b8d1f
+
+name: "Release Rust Crate"
+description: "Build and publish Rust crates to crates.io"
+author: "jdfalk"
+
+branding:
+  icon: "package"
+  color: "orange"
+
+inputs:
+  rust-version:
+    description: "Rust version to use"
+    required: false
+    default: "stable"
+  manifest-path:
+    description: "Path to Cargo.toml"
+    required: false
+    default: "./Cargo.toml"
+  crate-token:
+    description: "crates.io API token"
+    required: true
+  run-tests:
+    description: "Run tests before publishing"
+    required: false
+    default: "true"
+  run-clippy:
+    description: "Run clippy linter"
+    required: false
+    default: "true"
+  check-format:
+    description: "Check code formatting"
+    required: false
+    default: "true"
+  dry-run:
+    description: "Perform a dry run (do not actually publish)"
+    required: false
+    default: "false"
+  features:
+    description: "Features to enable (comma-separated)"
+    required: false
+    default: ""
+  all-features:
+    description: "Enable all features"
+    required: false
+    default: "false"
+
+outputs:
+  crate-name:
+    description: "Name of the published crate"
+    value: ${{ steps.metadata.outputs.name }}
+  crate-version:
+    description: "Version of the published crate"
+    value: ${{ steps.metadata.outputs.version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: ${{ inputs.rust-version }}
+        components: clippy, rustfmt
+      shell: bash
+
+    - name: Extract crate metadata
+      id: metadata
+      shell: bash
+      run: |
+        NAME=$(cargo metadata --manifest-path ${{ inputs.manifest-path }} --format-version 1 --no-deps | jq -r '.packages[0].name')
+        VERSION=$(cargo metadata --manifest-path ${{ inputs.manifest-path }} --format-version 1 --no-deps | jq -r '.packages[0].version')
+        echo "name=$NAME" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Check formatting
+      if: inputs.check-format == 'true'
+      shell: bash
+      run: |
+        cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
+
+    - name: Run clippy
+      if: inputs.run-clippy == 'true'
+      shell: bash
+      run: |
+        FEATURES_ARG=""
+        if [ "${{ inputs.all-features }}" == "true" ]; then
+          FEATURES_ARG="--all-features"
+        elif [ -n "${{ inputs.features }}" ]; then
+          FEATURES_ARG="--features ${{ inputs.features }}"
+        fi
+        cargo clippy --manifest-path ${{ inputs.manifest-path }} $FEATURES_ARG -- -D warnings
+
+    - name: Run tests
+      if: inputs.run-tests == 'true'
+      shell: bash
+      run: |
+        FEATURES_ARG=""
+        if [ "${{ inputs.all-features }}" == "true" ]; then
+          FEATURES_ARG="--all-features"
+        elif [ -n "${{ inputs.features }}" ]; then
+          FEATURES_ARG="--features ${{ inputs.features }}"
+        fi
+        cargo test --manifest-path ${{ inputs.manifest-path }} $FEATURES_ARG
+
+    - name: Build crate
+      shell: bash
+      run: |
+        FEATURES_ARG=""
+        if [ "${{ inputs.all-features }}" == "true" ]; then
+          FEATURES_ARG="--all-features"
+        elif [ -n "${{ inputs.features }}" ]; then
+          FEATURES_ARG="--features ${{ inputs.features }}"
+        fi
+        cargo build --manifest-path ${{ inputs.manifest-path }} --release $FEATURES_ARG
+
+    - name: Publish to crates.io
+      shell: bash
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ inputs.crate-token }}
+      run: |
+        DRY_RUN=""
+        if [ "${{ inputs.dry-run }}" == "true" ]; then
+          DRY_RUN="--dry-run"
+        fi
+
+        FEATURES_ARG=""
+        if [ "${{ inputs.all-features }}" == "true" ]; then
+          FEATURES_ARG="--all-features"
+        elif [ -n "${{ inputs.features }}" ]; then
+          FEATURES_ARG="--features ${{ inputs.features }}"
+        fi
+
+        cargo publish --manifest-path ${{ inputs.manifest-path }} $DRY_RUN $FEATURES_ARG
+
+    - name: Output summary
+      shell: bash
+      run: |
+        echo "## Rust Crate Release Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Crate:** ${{ steps.metadata.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Version:** ${{ steps.metadata.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Registry:** crates.io" >> $GITHUB_STEP_SUMMARY
+        echo "**Rust:** ${{ inputs.rust-version }}" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ inputs.dry-run }}" == "true" ]; then
+          echo "**Status:** Dry run (not published)" >> $GITHUB_STEP_SUMMARY
+        fi
