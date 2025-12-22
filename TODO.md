@@ -28,7 +28,7 @@ Error: The process '/home/runner/.cargo/bin/cargo' failed with exit code 101
 **Files Updated:**
 - `action.yml` - Added --allow-dirty flag to cargo publish command
 
-**Log File:** `/Users/jdfalk/repos/github.com/jdfalk/ghcommon/logs/ci-failures/release-rust-action_20251218_231443.log`
+**Log File:** `../ghcommon/logs/ci-failures/release-rust-action_20251218_231443.log`
 
 ---
 
