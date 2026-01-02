@@ -25,17 +25,17 @@ Build and publish Rust crates to crates.io with automated testing and linting.
 
 ## Inputs
 
-| Input | Description | Required | Default |
-|-------|-------------|----------|---------|
-| `rust-version` | Rust version | No | `stable` |
-| `manifest-path` | Cargo.toml path | No | `./Cargo.toml` |
-| `crate-token` | crates.io token | Yes | - |
-| `run-tests` | Run tests | No | `true` |
-| `run-clippy` | Run clippy | No | `true` |
-| `check-format` | Check format | No | `true` |
-| `dry-run` | Dry run | No | `false` |
-| `features` | Features | No | - |
-| `all-features` | All features | No | `false` |
+| Input           | Description     | Required | Default        |
+| --------------- | --------------- | -------- | -------------- |
+| `rust-version`  | Rust version    | No       | `stable`       |
+| `manifest-path` | Cargo.toml path | No       | `./Cargo.toml` |
+| `crate-token`   | crates.io token | Yes      | -              |
+| `run-tests`     | Run tests       | No       | `true`         |
+| `run-clippy`    | Run clippy      | No       | `true`         |
+| `check-format`  | Check format    | No       | `true`         |
+| `dry-run`       | Dry run         | No       | `false`        |
+| `features`      | Features        | No       | -              |
+| `all-features`  | All features    | No       | `false`        |
 
 ## License
 

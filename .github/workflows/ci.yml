@@ -57,13 +57,13 @@ jobs:
       - name: Test action execution
         uses: ./
         with:
-          rust-version: "stable"
-          manifest-path: "./test-project/Cargo.toml"
-          crate-token: "fake-token-for-testing"
-          run-tests: "true"
-          run-clippy: "true"
-          check-format: "false"
-          dry-run: "true"
+          rust-version: 'stable'
+          manifest-path: './test-project/Cargo.toml'
+          crate-token: 'fake-token-for-testing'
+          run-tests: 'true'
+          run-clippy: 'true'
+          check-format: 'false'
+          dry-run: 'true'
 
   lint:
     name: Lint
