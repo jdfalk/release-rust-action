@@ -1,5 +1,5 @@
 <!-- file: TODO.md -->
-<!-- version: 1.1.0 -->
+<!-- version: 1.1.1 -->
 <!-- guid: 12345678-1234-1234-1234-123456789001 -->
 
 # TODO - release-rust-action
@@ -13,7 +13,7 @@
 **Issue:** CI failing because cargo publish requires clean workspace **Error
 Message:**
 
-```
+```text
 Error: The process '/home/runner/.cargo/bin/cargo' failed with exit code 101
 ```
 
