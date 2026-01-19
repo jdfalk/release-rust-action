@@ -1,6 +1,7 @@
 <!-- file: README.md -->
 <!-- version: 1.0.0 -->
 <!-- guid: 4f8b2e9a-5d3c-6e2a-9f7d-2c4e5a1b8d6f -->
+<!-- last-edited: 2026-01-19 -->
 
 # Release Rust Crate Action
 
